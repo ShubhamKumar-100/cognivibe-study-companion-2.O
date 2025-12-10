@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CogniVibe - Multimodal Study Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: 'var(--bg-color)',
+              panel: 'var(--panel-color)',
+              accent: 'var(--accent-color)',
+              'accent-hover': 'var(--accent-hover)',
+              text: '#f3f4f6',
+              'text-muted': '#9ca3af',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              dyslexic: ['OpenDyslexic', 'sans-serif'],
+            },
+            animation: {
+              'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'slideUp': 'slideUp 0.5s ease-out forwards',
+              'fadeIn': 'fadeIn 0.3s ease-out forwards',
+            },
+            keyframes: {
+              'pulse-glow': {
+                '0%, 100%': { opacity: 1, boxShadow: '0 0 10px var(--accent-color)' },
+                '50%': { opacity: .7, boxShadow: '0 0 25px var(--accent-color)' },
+              },
+              'float': {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              'slideUp': {
+                '0%': { transform: 'translateY(20px)', opacity: 0 },
+                '100%': { transform: 'translateY(0)', opacity: 1 },
+              },
+              'fadeIn': {
+                '0%': { opacity: 0 },
+                '100%': { opacity: 1 },
+              }
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      @import url('https://fonts.cdnfonts.com/css/opendyslexic');
+      
+      :root {
+        --bg-color: #1e1e1e;
+        --panel-color: #2d2d2d;
+        --accent-color: #14b8a6;
+        --accent-hover: #0d9488;
+      }
+
+      /* Stressed / Calm Theme */
+      [data-theme='stressed'] {
+        --bg-color: #1e293b; /* Slate 900 */
+        --panel-color: #334155; /* Slate 700 */
+        --accent-color: #60a5fa; /* Blue 400 */
+        --accent-hover: #3b82f6;
+      }
+
+      /* Energetic / Gamified Theme */
+      [data-theme='energetic'] {
+        --bg-color: #2a0a0a; /* Dark Red/Black */
+        --panel-color: #3f1515;
+        --accent-color: #f97316; /* Orange 500 */
+        --accent-hover: #ea580c;
+      }
+      
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        transition: background-color 0.5s ease;
+      }
+      
+      body.font-dyslexic {
+        font-family: 'OpenDyslexic', sans-serif !important;
+      }
+
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--panel-color); 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280; 
+      }
+
+      .reading-ruler {
+        pointer-events: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: rgba(255, 255, 0, 0.2);
+        border-top: 2px solid rgba(255, 255, 0, 0.4);
+        border-bottom: 2px solid rgba(255, 255, 0, 0.4);
+        z-index: 9999;
+        transform: translateY(-50%);
+      }
+
+      .zen-dimed {
+        opacity: 0.15;
+        transition: opacity 0.5s ease;
+        filter: blur(2px);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+    "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm"
+  }
+}
+</script>
+</head>
+  <body class="bg-background text-text overflow-hidden h-screen">
+    <div id="root" class="h-full"></div>
+  </body>
+</html>
