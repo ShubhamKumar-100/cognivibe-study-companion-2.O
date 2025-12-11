@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, X, Image as ImageIcon, FileText, Sparkles } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, FileText, Sparkles, Video, Mic, Music } from 'lucide-react';
 
 interface UploadZoneProps {
   onAnalyze: (file: File) => void;
@@ -26,7 +26,13 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
+    // Allow Images, Video, and Audio
+    if (file && (
+      file.type.startsWith('image/') || 
+      file.type.startsWith('video/') || 
+      file.type.startsWith('audio/') ||
+      file.type === 'application/pdf'
+    )) {
       processFile(file);
     }
   }, []);
@@ -41,6 +47,7 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
   };
 
   const clearFile = () => {
+    if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
     setSelectedFile(null);
   };
@@ -51,10 +58,47 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
     }
   };
 
+  const renderPreviewContent = () => {
+    if (!selectedFile || !preview) return null;
+
+    if (selectedFile.type.startsWith('video/')) {
+      return (
+        <video 
+          src={preview} 
+          controls 
+          className="max-w-full max-h-full rounded-lg shadow-2xl border border-gray-700"
+        >
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    if (selectedFile.type.startsWith('audio/')) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 bg-gray-800 rounded-2xl border border-gray-700 shadow-xl w-full max-w-sm">
+          <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
+            <Mic className="text-accent w-10 h-10" />
+          </div>
+          <p className="text-white font-medium mb-4 truncate max-w-xs">{selectedFile.name}</p>
+          <audio src={preview} controls className="w-full" />
+        </div>
+      );
+    }
+
+    // Default to Image
+    return (
+      <img
+        src={preview}
+        alt="Uploaded preview"
+        className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
+      />
+    );
+  };
+
   return (
     <div className="h-full flex flex-col p-6">
-      <h2 className="text-2xl font-bold mb-4 text-accent">Upload Zone</h2>
-      <p className="text-text-muted mb-6">Upload your handwritten notes or diagrams to begin.</p>
+      <h2 className="text-2xl font-bold mb-2 text-accent">Upload Zone</h2>
+      <p className="text-text-muted mb-6">Upload content to generate your study module.</p>
 
       <div
         className={`flex-1 border-2 border-dashed rounded-3xl transition-all duration-300 flex flex-col items-center justify-center relative overflow-hidden ${
@@ -68,16 +112,13 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
       >
         {preview ? (
           <div className="relative w-full h-full flex flex-col">
-            <div className="flex-1 relative flex items-center justify-center bg-black/40 p-4">
-              <img
-                src={preview}
-                alt="Uploaded preview"
-                className="max-w-full max-h-full object-contain shadow-2xl"
-              />
+            <div className="flex-1 relative flex items-center justify-center bg-black/40 p-4 overflow-hidden">
+              {renderPreviewContent()}
+              
               {!isProcessing && (
                 <button
                   onClick={clearFile}
-                  className="absolute top-4 right-4 p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-full transition-colors backdrop-blur-sm z-20"
+                  className="absolute top-4 right-4 p-2 bg-red-500/80 hover:bg-red-500 text-white rounded-full transition-colors backdrop-blur-sm z-20 shadow-lg"
                 >
                   <X size={20} />
                 </button>
@@ -89,7 +130,7 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
               {isProcessing ? (
                  <div className="flex flex-col items-center gap-3">
                     <div className="w-8 h-8 rounded-full border-2 border-accent/30 border-t-accent animate-spin"></div>
-                    <p className="text-accent font-semibold animate-pulse">Analyzing content...</p>
+                    <p className="text-accent font-semibold animate-pulse">Analyzing multimodal input...</p>
                  </div>
               ) : (
                 <button
@@ -109,21 +150,24 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
             </div>
             <h3 className="text-xl font-semibold mb-2 text-white">Drag & Drop</h3>
             <p className="text-text-muted text-center max-w-xs mb-8">
-              Supports JPG, PNG, and Handwritten Notes
+              Supports Images, Video & Audio
             </p>
             <label className="cursor-pointer">
               <input
                 type="file"
                 className="hidden"
-                accept="image/*"
+                accept="image/*,video/mp4,video/webm,audio/mp3,audio/wav,audio/mpeg"
                 onChange={handleFileChange}
                 disabled={isProcessing}
               />
               <span className="px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-accent/25 active:scale-95 flex items-center gap-2">
-                <ImageIcon size={18} />
+                <Video size={18} />
                 Browse Files
               </span>
             </label>
+            <p className="mt-4 text-[10px] text-text-muted uppercase tracking-wider font-bold opacity-60">
+              Max Size: 20MB • Video &lt; 1min
+            </p>
           </>
         )}
       </div>
@@ -134,8 +178,10 @@ const UploadZone: React.FC<UploadZoneProps> = ({ onAnalyze, isProcessing }) => {
             <FileText className="text-yellow-500 w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-white">Pro Tip</h4>
-            <p className="text-xs text-text-muted mt-1">Ensure handwritten notes are well-lit for the best AI accuracy.</p>
+            <h4 className="text-sm font-semibold text-white">Multimodal Support</h4>
+            <p className="text-xs text-text-muted mt-1">
+              Upload class recordings (Audio/Video) or whiteboard photos. AI will transcribe and analyze the tone.
+            </p>
           </div>
         </div>
       )}

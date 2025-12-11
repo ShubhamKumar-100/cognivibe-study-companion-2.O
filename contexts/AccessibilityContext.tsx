@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+export type BackgroundTint = 'default' | 'sepia' | 'blue' | 'black';
+
 interface AccessibilityContextType {
   dyslexiaFont: boolean;
   setDyslexiaFont: (v: boolean) => void;
@@ -11,6 +13,14 @@ interface AccessibilityContextType {
   setMicroChunking: (v: boolean) => void;
   zenMode: boolean;
   setZenMode: (v: boolean) => void;
+  // New Visual Comfort State
+  syllableBreakdown: boolean;
+  setSyllableBreakdown: (v: boolean) => void;
+  bgTint: BackgroundTint;
+  setBgTint: (v: BackgroundTint) => void;
+  lineSpacing: number;
+  setLineSpacing: (v: number) => void;
+  resetAll: () => void;
 }
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
@@ -21,6 +31,22 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
   const [readingRuler, setReadingRuler] = useState(false);
   const [microChunking, setMicroChunking] = useState(false);
   const [zenMode, setZenMode] = useState(false);
+  
+  // New State
+  const [syllableBreakdown, setSyllableBreakdown] = useState(false);
+  const [bgTint, setBgTint] = useState<BackgroundTint>('default');
+  const [lineSpacing, setLineSpacing] = useState(1.6); // Default comfortable spacing
+
+  const resetAll = () => {
+    setDyslexiaFont(false);
+    setBionicReading(false);
+    setReadingRuler(false);
+    setMicroChunking(false);
+    setZenMode(false);
+    setSyllableBreakdown(false);
+    setBgTint('default');
+    setLineSpacing(1.6);
+  };
 
   return (
     <AccessibilityContext.Provider value={{
@@ -28,7 +54,11 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
       bionicReading, setBionicReading,
       readingRuler, setReadingRuler,
       microChunking, setMicroChunking,
-      zenMode, setZenMode
+      zenMode, setZenMode,
+      syllableBreakdown, setSyllableBreakdown,
+      bgTint, setBgTint,
+      lineSpacing, setLineSpacing,
+      resetAll
     }}>
       {children}
     </AccessibilityContext.Provider>

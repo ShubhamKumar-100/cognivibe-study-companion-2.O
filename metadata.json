@@ -1,5 +1,7 @@
 {
   "name": "CogniVibe2.O",
   "description": "A multimodal study companion that transforms your notes and images into stories, quizzes, mind maps, and flashcards using AI.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }
