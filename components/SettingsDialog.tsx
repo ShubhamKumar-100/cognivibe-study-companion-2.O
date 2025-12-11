@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, Languages, Sparkles, TestTube, Key } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
@@ -13,10 +14,10 @@ const INTERESTS: Interest[] = ['None', 'Minecraft', 'Marvel', 'Space', 'Cricket'
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
   const { 
-    apiKey, setApiKey, 
     language, setLanguage, 
     interest, setInterest, 
-    useMockMode, setUseMockMode 
+    useMockMode, setUseMockMode,
+    apiKey, setApiKey
   } = useSettings();
 
   const handleSave = () => {
@@ -38,19 +39,19 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
         <h2 className="text-xl font-bold mb-6">Settings</h2>
 
         <div className="space-y-6">
-          {/* API Key Section */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-300 mb-3">
+          {/* API Key Input */}
+          <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">
               <Key size={16} className="text-accent" /> Gemini API Key
             </label>
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your API key..."
-              className="w-full bg-gray-50 dark:bg-[#0f0f0f] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-accent outline-none transition-all"
+              placeholder="Enter your API Key..."
+              className="w-full bg-white dark:bg-[#0f0f0f] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-accent outline-none"
             />
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 italic">
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2">
               Saved locally. Used for all AI calls.
             </p>
           </div>

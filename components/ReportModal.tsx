@@ -1,5 +1,7 @@
+
+// components/ReportModal.tsx
 import React, { useState, useEffect } from 'react';
-import { X, Copy, CheckCircle, FileText } from 'lucide-react';
+import { X, Copy, CheckCircle, FileText, Brain } from 'lucide-react';
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -7,13 +9,13 @@ interface ReportModalProps {
   topic: string;
   score: number;
   totalQuestions: number;
+  weakestCategory?: string;
 }
 
-const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score, totalQuestions }) => {
+const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score, totalQuestions, weakestCategory }) => {
   const [focusTime, setFocusTime] = useState(12);
   const [copied, setCopied] = useState(false);
 
-  // Randomize focus time slightly whenever modal opens for demo realism
   useEffect(() => {
     if (isOpen) {
       setFocusTime(Math.floor(Math.random() * (20 - 10 + 1) + 10));
@@ -23,31 +25,28 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score
 
   if (!isOpen) return null;
 
-  // Percentage Calculation
   const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
-  // Logic for Status Message
   let statusColor = "";
   let statusTitle = "";
   let statusMessage = "";
 
-  if (percentage === 100) {
+  if (percentage >= 80) {
     statusColor = "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
     statusTitle = "🌟 Mastery";
     statusMessage = "The student has shown excellent recall of the core concepts. Ready for advanced topics.";
   } else if (percentage > 0) {
     statusColor = "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
-    statusTitle = "📈 Developing";
-    statusMessage = "Good understanding of basics, but specific concepts need a quick review.";
+    statusTitle = `📈 Developing ${weakestCategory ? `(Weak in ${weakestCategory})` : ""}`;
+    statusMessage = `Good understanding of basics, but ${weakestCategory ? `${weakestCategory} concepts` : "specific concepts"} need a quick review.`;
   } else {
     statusColor = "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800";
     statusTitle = "🧠 Needs Support";
-    statusMessage = "Recommend re-reading the Story Mode with 'Micro-Chunking' enabled.";
+    statusMessage = "Recommend re-reading the Story Mode with 'Micro-Chunking' enabled and focusing on predictions.";
   }
 
-  // Copy Function
   const handleCopy = () => {
-    const reportText = `Student Insight Report:\nTopic: ${topic}\nScore: ${score}/${totalQuestions} (${percentage}%)\nFocus Time: ${focusTime} mins\nStatus: ${statusTitle} - ${statusMessage}`;
+    const reportText = `Student Insight Report:\nTopic: ${topic}\nScore: ${score}/${totalQuestions} (${percentage}%)\nWeakest Category: ${weakestCategory || 'None'}\nFocus Time: ${focusTime} mins\nStatus: ${statusTitle} - ${statusMessage}`;
     navigator.clipboard.writeText(reportText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -55,10 +54,8 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      {/* Modal Card */}
       <div className="bg-white dark:bg-[#1e1e1e] w-full max-w-md rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all scale-100">
         
-        {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-[#2d2d2d]">
           <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -69,10 +66,7 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-6">
-          
-          {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/10">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Topic</p>
@@ -84,30 +78,25 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, topic, score
             </div>
           </div>
 
-          {/* Score Section */}
           <div className="flex items-center justify-between p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-500/30">
             <div>
               <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">Quiz Performance</p>
               <h3 className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{score} / {totalQuestions}</h3>
             </div>
-            {/* Circular Progress Badge */}
             <div className="w-12 h-12 rounded-full border-4 border-indigo-200 dark:border-indigo-500 flex items-center justify-center bg-white dark:bg-indigo-900">
               <span className="text-xs font-bold text-indigo-700 dark:text-indigo-200">{percentage}%</span>
             </div>
           </div>
 
-          {/* AI Insight Section */}
           <div className={`p-4 rounded-lg border ${statusColor} text-sm transition-colors`}>
-            <p className="font-bold flex items-center gap-2 mb-1 text-base">
-              {statusTitle}
-            </p>
-            <p className="opacity-90 leading-relaxed">
-              {statusMessage}
-            </p>
+            <div className="flex items-center gap-2 mb-2">
+               {weakestCategory && percentage < 80 && <Brain size={16} className="text-amber-500" />}
+               <p className="font-bold text-base">{statusTitle}</p>
+            </div>
+            <p className="opacity-90 leading-relaxed">{statusMessage}</p>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 dark:bg-[#2d2d2d] border-t border-gray-100 dark:border-gray-800 flex gap-3">
           <button 
             onClick={onClose}

@@ -11,6 +11,7 @@ export interface UserSettings {
   language: Language;
   interest: Interest;
   useMockMode: boolean;
+  apiKey: string; // Added apiKey
 }
 
 export interface MindMapNode {
@@ -24,34 +25,34 @@ export interface QuizQuestion {
   id: number;
   question: string;
   options: string[];
-  correctAnswer: string; // Changed to string to match AI output (e.g., "Option A" or text)
-  explanation?: string; // Made optional as not all prompts return it immediately
+  correctAnswer: string;
+  explanation?: string;
   socraticHint: string;
+  type: 'Conceptual' | 'Formula' | 'Applied Logic'; // New field for Blind-Spot Hunter
 }
 
 export interface Flashcard {
   id: number;
-  term: string; // Changed 'front' to 'term' to match service
-  definition: string; // Changed 'back' to 'definition' to match service
+  term: string;
+  definition: string;
 }
 
-// --- NEW INTERFACE FOR PAPER LEAKER ---
 export interface ExamPredictions {
   longAnswer: {
     question: string;
     modelAnswer: string;
-    examinerSecret: string; // The "Reasoning" behind the prediction
+    examinerSecret: string;
   };
   shortReasoning: {
     question: string;
     answer: string;
-    studentTrap: string; // Renamed 'trap' to 'studentTrap' to match service
+    studentTrap: string;
   };
   mcq: {
     question: string;
     options: string[];
     correct: string;
-    twist: string; // The specific trick in the MCQ
+    twist: string;
   };
 }
 
@@ -71,8 +72,7 @@ export interface AnalysisResult {
   };
   quiz: QuizQuestion[];
   flashcards: Flashcard[];
-  examPredictions?: ExamPredictions; // Added the new field
+  examPredictions?: ExamPredictions;
 }
 
-// Added 'examleak' for the new tab
-export type TabType = 'story' | 'quiz' | 'mindmap' | 'flashcards' | 'examleak';
+export type TabType = 'story' | 'quiz' | 'mindmap' | 'flashcards' | 'examleak' | 'debate';

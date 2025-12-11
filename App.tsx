@@ -21,7 +21,9 @@ import { analyzeImage } from './services/geminiService';
 import { AccessibilityProvider, useAccessibility } from './contexts/AccessibilityContext';
 import { SettingsProvider, useSettings } from './contexts/SettingsContext';
 import { AudioProvider, useAudio } from './contexts/AudioContext';
+import { ProgressProvider, useProgress } from './contexts/ProgressContext';
 
+// AppHeader component for navigation and utility buttons
 const AppHeader = ({ 
   isDark, 
   toggleTheme, 
@@ -94,7 +96,7 @@ const AppHeader = ({
           <span className="hidden md:inline">Report</span>
         </button>
         <button onClick={() => setIsSettingsOpen(true)} className="p-2 rounded-full hover:bg-gray-700/50 transition-colors text-text-muted hover:text-text">
-          <Settings size={20} />
+          Settings
         </button>
         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-700/50 transition-colors text-text-muted hover:text-text">
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -104,6 +106,7 @@ const AppHeader = ({
   );
 };
 
+// Main application logic and layout
 const MainApp: React.FC = () => {
   const [isDark, setIsDark] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -115,6 +118,7 @@ const MainApp: React.FC = () => {
 
   const { dyslexiaFont, readingRuler, zenMode, setZenMode } = useAccessibility();
   const settings = useSettings(); 
+  const progress = useProgress();
   const { mood, useMockMode } = settings; 
 
   useEffect(() => {
@@ -171,16 +175,22 @@ const MainApp: React.FC = () => {
       <ReportModal 
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
-        topic={analysisData?.mindMap?.root || "No Topic Loaded"}
-        score={3} 
-        totalQuestions={3}
+        topic={progress.topic}
+        score={progress.score}
+        totalQuestions={progress.totalQuestions}
+        weakestCategory={progress.weakestCategory}
       />
 
       {readingRuler && (<div className="reading-ruler z-[60]" style={{ top: `${rulerY}px` }} />)}
 
       {zenMode && (
-        <div className="fixed inset-0 bg-black/95 z-40 transition-opacity duration-500 flex flex-col items-center justify-end pb-10 pointer-events-auto animate-fadeIn">
-           <button onClick={() => setZenMode(false)} className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full border border-white/30 backdrop-blur-md transition-all font-bold tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">EXIT ZEN MODE <X size={18} /></button>
+        <div className="fixed inset-0 bg-black/95 z-40 transition-opacity duration-500 flex items-center justify-center pointer-events-auto animate-fadeIn">
+           <button 
+            onClick={() => setZenMode(false)} 
+            className="fixed bottom-10 left-10 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full border border-white/30 backdrop-blur-md transition-all z-50 flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-105 active:scale-95 font-bold tracking-widest"
+          >
+            EXIT ZEN MODE <X size={18} />
+          </button>
         </div>
       )}
 
@@ -208,31 +218,37 @@ const MainApp: React.FC = () => {
       )}
 
       {useMockMode && !zenMode && (
-        <div className="fixed bottom-24 right-6 z-50 bg-accent/20 border border-accent/50 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md pointer-events-none animate-pulse">Test Data</div>
+        <div className="fixed bottom-24 right-6 z-50 bg-accent/20 border border-accent/50 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md pointer-events-none">
+          MOCK MODE ACTIVE
+        </div>
       )}
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-        <div className={`w-full md:w-1/2 border-b md:border-b-0 md:border-r border-gray-700/50 bg-background transition-all duration-500 min-h-[300px] ${zenMode ? 'opacity-5 blur-sm pointer-events-none' : 'opacity-100'}`}>
-           <UploadZone onAnalyze={handleAnalyze} isProcessing={isProcessing} />
+      <main className="flex-1 flex flex-col md:flex-row overflow-hidden transition-all duration-500">
+        <div className={`w-full md:w-[400px] border-r border-gray-700/50 bg-panel overflow-y-auto shrink-0 transition-all duration-500 ${zenMode ? 'opacity-10 blur-sm pointer-events-none' : 'opacity-100'}`}>
+          <UploadZone onAnalyze={handleAnalyze} isProcessing={isProcessing} />
         </div>
-        <div className={`w-full md:w-1/2 flex-1 md:h-full bg-panel transition-all duration-500 ${zenMode ? 'relative z-50 shadow-[0_0_50px_rgba(0,0,0,0.5)] border-l border-gray-800' : 'z-0'}`}>
+        <div className={`flex-1 flex flex-col overflow-hidden relative transition-all duration-500 ${zenMode ? 'z-50' : 'z-10'}`}>
           <KnowledgeDisplay data={analysisData} isProcessing={isProcessing} />
+          <AccessibilityToolbar />
         </div>
-      </div>
-
-      <AccessibilityToolbar />
+      </main>
     </div>
   );
 };
 
-const App: React.FC = () => (
-  <SettingsProvider>
-    <AudioProvider>
+// Main App wrapper component with context providers
+const App: React.FC = () => {
+  return (
+    <SettingsProvider>
       <AccessibilityProvider>
-        <MainApp />
+        <AudioProvider>
+          <ProgressProvider>
+            <MainApp />
+          </ProgressProvider>
+        </AudioProvider>
       </AccessibilityProvider>
-    </AudioProvider>
-  </SettingsProvider>
-);
+    </SettingsProvider>
+  );
+};
 
 export default App;
