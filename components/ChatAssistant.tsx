@@ -38,7 +38,8 @@ const ChatAssistant: React.FC = () => {
 
     try {
       const context = interest !== 'None' ? `Interest: ${interest}` : "General Study Helper";
-      const response = await getVivaResponse(currentInput, context, mood, settings.apiKey);
+      // Fix: Removed the unnecessary 4th argument settings.apiKey to match getVivaResponse's signature (3 parameters)
+      const response = await getVivaResponse(currentInput, context, mood);
       const assistantMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: response, timestamp: new Date() };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {

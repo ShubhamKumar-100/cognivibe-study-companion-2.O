@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Swords, Mic, MicOff, Loader2, Bot, User, Volume2, 
@@ -123,7 +124,8 @@ const DebateMode: React.FC<{ topic: string }> = ({ topic }) => {
     setMessages(prev => [...prev, { role: 'user', text }]);
     setLoading(true);
     try {
-      const rebuttal = await getDebateResponse(text, topic, messages, settings.apiKey);
+      // Fix: Removed unnecessary 4th argument settings.apiKey to match getDebateResponse's signature (3 parameters)
+      const rebuttal = await getDebateResponse(text, topic, messages);
       setMessages(prev => [...prev, { role: 'ai', text: rebuttal }]);
       
       // Only speak if not paused during the network call

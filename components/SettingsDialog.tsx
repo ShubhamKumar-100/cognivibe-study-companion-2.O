@@ -1,6 +1,6 @@
-
+// components/SettingsDialog.tsx
 import React from 'react';
-import { X, Languages, Sparkles, TestTube, Key } from 'lucide-react';
+import { X, Languages, Sparkles, TestTube } from 'lucide-react';
 import { useSettings } from '../contexts/SettingsContext';
 import { Language, Interest } from '../types';
 
@@ -16,8 +16,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
   const { 
     language, setLanguage, 
     interest, setInterest, 
-    useMockMode, setUseMockMode,
-    apiKey, setApiKey
+    useMockMode, setUseMockMode
   } = useSettings();
 
   const handleSave = () => {
@@ -39,23 +38,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
         <h2 className="text-xl font-bold mb-6">Settings</h2>
 
         <div className="space-y-6">
-          {/* API Key Input */}
-          <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
-            <label className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">
-              <Key size={16} className="text-accent" /> Gemini API Key
-            </label>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your API Key..."
-              className="w-full bg-white dark:bg-[#0f0f0f] border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-accent outline-none"
-            />
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2">
-              Saved locally. Used for all AI calls.
-            </p>
-          </div>
-
           {/* Mock Mode Toggle */}
           <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
             <div className="flex items-center justify-between mb-2">
@@ -117,9 +99,6 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </div>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Gemini will explain concepts using metaphors from your selected interest.
-            </p>
           </div>
         </div>
 

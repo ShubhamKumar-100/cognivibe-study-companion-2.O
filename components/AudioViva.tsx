@@ -1,4 +1,4 @@
-
+// components/AudioViva.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Volume2, X, Loader2, MessageCircle, Sparkles } from 'lucide-react';
 import { getVivaResponse } from '../services/geminiService';
@@ -23,7 +23,6 @@ export default function AudioViva() {
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onstart = () => { setIsListening(true); setError(null); };
@@ -35,13 +34,11 @@ export default function AudioViva() {
       };
       recognitionRef.current.onerror = (event: any) => {
         setIsListening(false);
-        if (event.error === 'no-speech') return;
-        if (event.error === 'not-allowed') setError("Microphone access denied. Check browser permissions.");
-        else setError("Could not hear you. Please try again.");
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          setError(`Mic error: ${event.error}`);
+        }
       };
       recognitionRef.current.onend = () => { setIsListening(false); };
-    } else {
-      setError("Speech recognition is not supported in this browser. Try Chrome.");
     }
     synthRef.current = window.speechSynthesis;
     return () => {
@@ -51,11 +48,11 @@ export default function AudioViva() {
   }, []);
 
   const toggleListening = () => {
-    if (isListening) try { recognitionRef.current?.stop(); } catch (e) { setIsListening(false); }
+    if (isListening) recognitionRef.current?.stop();
     else {
-      if (synthRef.current?.speaking) synthRef.current.cancel(); 
+      synthRef.current?.cancel();
       setTranscript(''); setResponse(''); setError(null);
-      setTimeout(() => { try { recognitionRef.current?.start(); } catch (e) { setIsListening(false); } }, 100);
+      recognitionRef.current?.start();
     }
   };
 
@@ -64,10 +61,10 @@ export default function AudioViva() {
     setLoading(true);
     try {
       const context = interest !== 'None' ? interest : "General Education";
-      const aiResponse = await getVivaResponse(query, context, mood, settings.apiKey);
+      const aiResponse = await getVivaResponse(query, context, mood);
       setResponse(aiResponse);
       speakResponse(aiResponse);
-    } catch (err) { setError("AI check failed. Check your connection."); }
+    } catch (err) { setError("AI Check failed."); }
     finally { setLoading(false); }
   };
 
@@ -75,41 +72,35 @@ export default function AudioViva() {
     if (!synthRef.current) return;
     synthRef.current.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = synthRef.current.getVoices();
-    const preferredVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google')) || voices.find(v => v.lang === 'en-US');
-    if (preferredVoice) utterance.voice = preferredVoice;
-    utterance.rate = 1.0; 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
     synthRef.current.speak(utterance);
   };
 
   if (!isOpen) {
     return (
-      <button onClick={() => setIsOpen(true)} className="fixed bottom-24 right-6 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-50 border-2 border-white/20" title="Voice Viva Mode">
+      <button onClick={() => setIsOpen(true)} className="fixed bottom-24 right-6 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-[100] border-2 border-white/20">
         <MessageCircle size={28} />
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-24 right-6 w-80 bg-panel border border-purple-500/30 rounded-2xl shadow-2xl p-6 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300 overflow-hidden">
-      <div className={`absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl transition-all duration-500 ${isListening || isSpeaking ? 'opacity-100 scale-150' : 'opacity-0 scale-100'}`} />
-      <div className="flex justify-between items-center mb-4 relative z-10">
+    <div className="fixed bottom-24 right-6 w-80 bg-panel border border-purple-500/30 rounded-2xl shadow-2xl p-6 z-[100] animate-in fade-in slide-in-from-bottom-4">
+      <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-purple-400 flex items-center gap-2"><Sparkles size={16} /> Audio Viva</h3>
-        <button onClick={() => { setIsOpen(false); synthRef.current?.cancel(); }} className="text-gray-500 hover:text-white transition-colors"><X size={20} /></button>
+        <button onClick={() => { setIsOpen(false); synthRef.current?.cancel(); }} className="text-gray-500 hover:text-white"><X size={20} /></button>
       </div>
-      <div className="space-y-4 relative z-10">
+      <div className="space-y-4">
         <div className="min-h-[100px] flex flex-col justify-center">
-          {transcript && <div className="mb-3 animate-fadeIn"><span className="text-[10px] font-bold text-purple-500 uppercase tracking-widest block mb-1">You asked</span><p className="text-sm text-gray-300 italic">"{transcript}"</p></div>}
-          {loading ? <div className="flex items-center gap-2 text-purple-400 animate-pulse"><Loader2 size={16} className="animate-spin" /><span className="text-xs font-medium">Thinking...</span></div> : response ? <div className="animate-slideUp"><span className="text-[10px] font-bold text-teal-500 uppercase tracking-widest block mb-1">AI Tutor</span><p className="text-sm text-white leading-relaxed">{response}</p></div> : !error ? <p className="text-xs text-text-muted text-center italic">"Tap the mic and ask me anything!"</p> : null}
-          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-xs">{error}</div>}
+          {transcript && <p className="text-xs text-purple-300 italic mb-2">"{transcript}"</p>}
+          {loading ? <Loader2 size={20} className="animate-spin text-purple-400 mx-auto" /> : <p className="text-sm text-white leading-relaxed">{response || "Ask me anything!"}</p>}
+          {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
         </div>
-        <div className="flex flex-col items-center gap-3">
-          <button onClick={toggleListening} className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]' : 'bg-purple-600 hover:bg-purple-700 shadow-lg'}`}>{isListening ? <MicOff size={28} className="text-white" /> : <Mic size={28} className="text-white" />}</button>
-          <span className={`text-[10px] font-bold uppercase tracking-widest ${isListening ? 'text-red-400' : 'text-text-muted'}`}>{isListening ? 'Listening...' : 'Tap to Speak'}</span>
-        </div>
+        <button onClick={toggleListening} className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-purple-600 hover:bg-purple-700'}`}>
+          {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          {isListening ? 'Stop' : 'Ask Viva'}
+        </button>
       </div>
     </div>
   );

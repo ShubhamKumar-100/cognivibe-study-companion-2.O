@@ -1,5 +1,5 @@
-
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+// contexts/SettingsContext.tsx
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Mood, Language, Interest, UserSettings } from '../types';
 
 interface SettingsContextType extends UserSettings {
@@ -7,7 +7,6 @@ interface SettingsContextType extends UserSettings {
   setLanguage: (lang: Language) => void;
   setInterest: (interest: Interest) => void;
   setUseMockMode: (useMock: boolean) => void;
-  setApiKey: (key: string) => void;
   showMoodModal: boolean;
   setShowMoodModal: (show: boolean) => void;
 }
@@ -19,13 +18,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [language, setLanguage] = useState<Language>('English');
   const [interest, setInterest] = useState<Interest>('None');
   const [useMockMode, setUseMockMode] = useState<boolean>(false);
-  const [apiKey, setApiKeyState] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
   const [showMoodModal, setShowMoodModal] = useState(true);
-
-  const setApiKey = (key: string) => {
-    setApiKeyState(key);
-    localStorage.setItem('gemini_api_key', key);
-  };
 
   return (
     <SettingsContext.Provider value={{
@@ -33,7 +26,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       language, setLanguage,
       interest, setInterest,
       useMockMode, setUseMockMode,
-      apiKey, setApiKey,
+      apiKey: '', // Ignored, using process.env.API_KEY directly
       showMoodModal, setShowMoodModal
     }}>
       {children}
