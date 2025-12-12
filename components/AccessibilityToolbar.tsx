@@ -19,7 +19,7 @@ const AccessibilityToolbar: React.FC = () => {
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">
       {isOpen && (
-        <div className="mb-4 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-5 w-80 animate-slideUp max-h-[85vh] overflow-y-auto custom-scrollbar text-gray-900 dark:text-gray-100">
+        <div className="mb-4 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-5 w-80 animate-slideUp max-h-[85vh] overflow-y-auto custom-scrollbar text-gray-900 dark:text-gray-100 z-[100]">
           <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
             <h3 className="font-bold flex items-center gap-2 text-gray-900 dark:text-white">
               <Accessibility size={20} className="text-accent" /> Access Tools

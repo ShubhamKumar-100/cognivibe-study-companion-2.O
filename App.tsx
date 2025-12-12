@@ -119,7 +119,7 @@ const MainApp: React.FC = () => {
   const { dyslexiaFont, readingRuler, zenMode, setZenMode } = useAccessibility();
   const settings = useSettings(); 
   const progress = useProgress();
-  const { mood, useMockMode } = settings; 
+  const { mood } = settings; 
 
   useEffect(() => {
     const html = document.documentElement;
@@ -217,11 +217,13 @@ const MainApp: React.FC = () => {
         </div>
       )}
 
+      {/* 
       {useMockMode && !zenMode && (
         <div className="fixed bottom-24 right-6 z-50 bg-accent/20 border border-accent/50 text-accent px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-md pointer-events-none">
           MOCK MODE ACTIVE
         </div>
       )}
+      */}
 
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden transition-all duration-500">
         <div className={`w-full md:w-[400px] border-r border-gray-700/50 bg-panel overflow-y-auto shrink-0 transition-all duration-500 ${zenMode ? 'opacity-10 blur-sm pointer-events-none' : 'opacity-100'}`}>

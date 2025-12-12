@@ -1,3 +1,4 @@
+
 // components/SettingsDialog.tsx
 import React from 'react';
 import { X, Languages, Sparkles, TestTube } from 'lucide-react';
@@ -16,7 +17,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
   const { 
     language, setLanguage, 
     interest, setInterest, 
-    useMockMode, setUseMockMode
+    // useMockMode, setUseMockMode
   } = useSettings();
 
   const handleSave = () => {
@@ -39,6 +40,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
 
         <div className="space-y-6">
           {/* Mock Mode Toggle */}
+          {/* 
           <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
             <div className="flex items-center justify-between mb-2">
               <label className="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-200">
@@ -55,8 +57,8 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
               Use simulated data instead of calling Gemini API.
             </p>
           </div>
-
           <hr className="border-gray-200 dark:border-gray-700" />
+          */}
 
           {/* Language Selection */}
           <div>

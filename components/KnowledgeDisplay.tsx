@@ -163,35 +163,72 @@ const StoryMode: React.FC<{ story: any; cheatSheet: any[]; visualMnemonic?: stri
         style={{ lineHeight: zenMode ? '2' : String(lineSpacing) }}
         onMouseUp={handleTextSelection}
       >
-        {paragraphs.map((paragraph, pIdx) => {
-          const sentences = paragraph.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [paragraph];
-          return (
-            <p key={pIdx} className="mb-4 md:mb-6 relative">
-              {sentences.map((sentence, sIdx) => {
-                const startIndex = cumulativeCharCount;
-                const safeSentence = String(sentence || '');
-                const endIndex = startIndex + safeSentence.length;
-                cumulativeCharCount += safeSentence.length;
-                if (sIdx === sentences.length - 1) cumulativeCharCount += 1; 
-                
-                const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex < endIndex + 2);
-                
-                return (
-                  <span 
-                    key={sIdx}
-                    className={`transition-colors duration-300 rounded px-0.5 ${
-                        isActive 
-                        ? 'bg-yellow-200 text-gray-900 box-decoration-clone dark:bg-teal-800 dark:text-white shadow-sm font-medium' 
-                        : ''
-                    }`}
-                  >
-                    {applyAccessibilityTransforms(safeSentence, { bionic: bionicReading, chunking: false, syllables: syllableBreakdown })}
+        {microChunking ? (
+          <ul className="list-none space-y-4">
+            {paragraphs.map((paragraph, pIdx) => {
+              const sentences = paragraph.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [paragraph];
+              return (
+                <li key={pIdx} className="flex gap-3 items-start mb-4 leading-loose group">
+                  <span className="text-accent mt-1.5 shrink-0 transition-transform group-hover:scale-125 font-bold text-xl">•</span>
+                  <span className="flex-1">
+                    {sentences.map((sentence, sIdx) => {
+                      const startIndex = cumulativeCharCount;
+                      const safeSentence = String(sentence || '');
+                      const endIndex = startIndex + safeSentence.length;
+                      cumulativeCharCount += safeSentence.length;
+                      if (sIdx === sentences.length - 1) cumulativeCharCount += 1; 
+                      
+                      const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex < endIndex + 2);
+                      
+                      return (
+                        <span 
+                          key={sIdx}
+                          className={`transition-colors duration-300 rounded px-0.5 ${
+                              isActive 
+                              ? 'bg-yellow-200 text-gray-900 box-decoration-clone dark:bg-teal-800 dark:text-white shadow-sm font-medium' 
+                              : ''
+                          }`}
+                        >
+                          {applyAccessibilityTransforms(safeSentence, { bionic: bionicReading, chunking: false, syllables: syllableBreakdown })}
+                        </span>
+                      );
+                    })}
                   </span>
-                );
-              })}
-            </p>
-          );
-        })}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          paragraphs.map((paragraph, pIdx) => {
+            const sentences = paragraph.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [paragraph];
+            return (
+              <p key={pIdx} className="mb-4 md:mb-6 relative">
+                {sentences.map((sentence, sIdx) => {
+                  const startIndex = cumulativeCharCount;
+                  const safeSentence = String(sentence || '');
+                  const endIndex = startIndex + safeSentence.length;
+                  cumulativeCharCount += safeSentence.length;
+                  if (sIdx === sentences.length - 1) cumulativeCharCount += 1; 
+                  
+                  const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex < endIndex + 2);
+                  
+                  return (
+                    <span 
+                      key={sIdx}
+                      className={`transition-colors duration-300 rounded px-0.5 ${
+                          isActive 
+                          ? 'bg-yellow-200 text-gray-900 box-decoration-clone dark:bg-teal-800 dark:text-white shadow-sm font-medium' 
+                          : ''
+                      }`}
+                    >
+                      {applyAccessibilityTransforms(safeSentence, { bionic: bionicReading, chunking: false, syllables: syllableBreakdown })}
+                    </span>
+                  );
+                })}
+              </p>
+            );
+          })
+        )}
       </div>
     );
   };
@@ -438,6 +475,7 @@ const GamifiedQuestionCard: React.FC<{ question: QuizQuestion; onAnswer: (correc
             if (isFirstClick) onAnswer(true);
         } else {
             setStatus('incorrect');
+            // Incorrect answer sound as requested (disappointed tone)
             new Audio('https://assets.mixkit.co/active_storage/sfx/2882/2882-preview.mp3').play().catch(() => {});
             if (isFirstClick) onAnswer(false);
             setIsLoadingHint(true);
@@ -536,7 +574,8 @@ const MindMapMode: React.FC<{ rootTopic: string, initialNodes: MindMapNode[] }> 
     if (hasChildren) return; 
     setExpandingId(node.id);
     try {
-      const newSubNodes = await expandMindMapNode(String(rootTopic || ''), String(node.label || ''), String(node.id || ''), settings.useMockMode);
+      // Fix: Removed reference to non-existent settings.useMockMode and updated expandMindMapNode call.
+      const newSubNodes = await expandMindMapNode(String(rootTopic || ''), String(node.label || ''), String(node.id || ''));
       setNodes(prev => [...prev, ...newSubNodes]);
     } catch (err) { console.error("Zoom Error", err); } finally { setExpandingId(null); }
   };
@@ -797,6 +836,15 @@ const KnowledgeDisplay: React.FC<KnowledgeDisplayProps> = ({ data, isProcessing 
     return wrappedContent;
   };
 
+  const TabButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; label: string; isSpecial?: boolean; tint: string }> = ({ active, onClick, icon, label, isSpecial, tint }) => {
+    const isLight = tint === 'sepia' || tint === 'blue';
+    return (
+      <button onClick={onClick} className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${active ? (isSpecial ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-500/10' : 'border-accent text-accent') : `border-transparent ${isLight ? 'text-gray-600 hover:text-gray-900' : 'text-text-muted hover:text-text'} hover:bg-black/5`}`}>
+        {icon} {label}
+      </button>
+    );
+  };
+
   return (
     <div className={`h-full flex flex-col transition-all duration-500 ${themeStyles.container}`}>
       <div className={`flex items-center px-4 md:px-6 pt-2 md:pt-4 border-b ${themeStyles.border} bg-white/5 backdrop-blur-md overflow-x-auto no-scrollbar shrink-0 z-20 shadow-sm scroll-smooth`}>
@@ -809,15 +857,6 @@ const KnowledgeDisplay: React.FC<KnowledgeDisplayProps> = ({ data, isProcessing 
       </div>
       <div className="flex-1 overflow-hidden relative">{renderContent()}</div>
     </div>
-  );
-};
-
-const TabButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; label: string; isSpecial?: boolean; tint: string }> = ({ active, onClick, icon, label, isSpecial, tint }) => {
-  const isLight = tint === 'sepia' || tint === 'blue';
-  return (
-    <button onClick={onClick} className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm transition-all border-b-2 whitespace-nowrap ${active ? (isSpecial ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-500/10' : 'border-accent text-accent') : `border-transparent ${isLight ? 'text-gray-600 hover:text-gray-900' : 'text-text-muted hover:text-text'} hover:bg-black/5`}`}>
-      {icon} {label}
-    </button>
   );
 };
 

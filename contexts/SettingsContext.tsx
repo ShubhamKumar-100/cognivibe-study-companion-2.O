@@ -1,3 +1,4 @@
+
 // contexts/SettingsContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Mood, Language, Interest, UserSettings } from '../types';
@@ -6,7 +7,7 @@ interface SettingsContextType extends UserSettings {
   setMood: (mood: Mood) => void;
   setLanguage: (lang: Language) => void;
   setInterest: (interest: Interest) => void;
-  setUseMockMode: (useMock: boolean) => void;
+  // setUseMockMode: (useMock: boolean) => void;
   showMoodModal: boolean;
   setShowMoodModal: (show: boolean) => void;
 }
@@ -17,7 +18,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [mood, setMood] = useState<Mood>('BALANCED');
   const [language, setLanguage] = useState<Language>('English');
   const [interest, setInterest] = useState<Interest>('None');
-  const [useMockMode, setUseMockMode] = useState<boolean>(false);
+  // const [useMockMode, setUseMockMode] = useState<boolean>(false);
   const [showMoodModal, setShowMoodModal] = useState(true);
 
   return (
@@ -25,10 +26,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       mood, setMood,
       language, setLanguage,
       interest, setInterest,
-      useMockMode, setUseMockMode,
+      // useMockMode, setUseMockMode,
       apiKey: '', // Ignored, using process.env.API_KEY directly
       showMoodModal, setShowMoodModal
-    }}>
+    } as any}>
       {children}
     </SettingsContext.Provider>
   );

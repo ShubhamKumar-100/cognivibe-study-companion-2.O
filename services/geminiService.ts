@@ -94,72 +94,10 @@ async function fileToGenerativePart(file: File): Promise<{ inlineData: { data: s
   });
 }
 
-const MOCK_DATA: AnalysisResult = {
-  story: {
-    title: "The HERIC Circuit: The Cricket Team of Inverters",
-    narrative: "Let's learn about the HERIC circuit! First, breathe in, hold for a moment, and breathe out slowly. Think of a cricket team (the circuit). The HERIC, or Highly Efficient and Reliable Inverter Concept, is like a star all-rounder.\n\nImagine a cricket match. Sometimes, the team needs to score runs quickly (positive state). Switches S1 and S2 are like batsmen hitting boundaries! When the game pauses (zero state), only the wicket-keeper S5 is active, stopping any extra runs (leakage current). The other players (S1, S2, S3, S4) rest. HERIC needs more players (switches), so it's like having a bigger team, which might cost more to maintain. But during the pause, HERIC and another circuit (H5) have the same number of players actively stopping runs, so they perform equally well! When scoring (active state), HERIC has the bowler (S1) delivering the ball and it coming back via another player (S2). In another version (H5), three players are involved. It might use slightly more energy, but that's the basic idea!",
-    cheatSheet: [
-      "HERIC: Efficient circuit using switches.",
-      "Positive State: S1 & S2 ON.",
-      "Zero State: S5 ON, stops leakage."
-    ],
-    visualVibe: {
-      svg_code: "<svg viewBox='0 0 500 300' xmlns='http://www.w3.org/2000/svg'><rect width='500' height='300' fill='#f9fafb'/><line x1='150' y1='150' x2='350' y2='150' stroke='#3b82f6' stroke-width='4'/><circle cx='150' cy='150' r='50' fill='#10b981'/><text x='150' y='155' font-family='Arial' font-size='20' fill='white' text-anchor='middle' font-weight='bold'>HERIC</text><circle cx='350' cy='150' r='50' fill='#ef4444'/><text x='350' y='155' font-family='Arial' font-size='20' fill='white' text-anchor='middle' font-weight='bold'>CRICKET</text><text x='250' y='250' font-family='Arial' font-size='14' fill='#6b7280' text-anchor='middle'>Energy Flow (Runs Scored)</text></svg>",
-      caption: "HERIC Circuit vs Cricket Team Analogy"
-    }
-  },
-  mindMap: {
-    root: "HERIC Circuit",
-    nodes: [
-      { id: "1", label: "Positive State", description: "Current flows through S1 and S2 (The Batsmen). This is when power is actively generated.", parentId: "root" },
-      { id: "2", label: "Zero State", description: "Freewheeling state where S5 conducts (The Wicket Keeper). This disconnects the source.", parentId: "root" },
-      { id: "3", label: "Switches", description: "Uses multiple switches (IGBTs/MOSFETs) to control the precise energy flow paths.", parentId: "root" },
-      { id: "4", label: "Leakage Current", description: "Minimizes leakage current to improve safety and efficiency of the overall system.", parentId: "root" },
-      { id: "5", label: "Efficiency", description: "High efficiency by decoupling AC and DC sides during zero states.", parentId: "root" }
-    ]
-  },
-  quiz: [
-    {
-      id: 1,
-      question: "In the positive state of a HERIC circuit, which switches are ON?",
-      options: ["S1 and S2", "S3 and S4", "S5 only", "None"],
-      correctAnswer: "S1 and S2",
-      socraticHint: "Remember the analogy! Who are the batsmen scoring the runs in the active phase?",
-      type: 'Conceptual'
-    },
-    {
-      id: 2,
-      question: "What is the main role of the 'Zero State'?",
-      options: ["To generate heat", "To stop leakage current", "To increase voltage", "To shut down the system"],
-      correctAnswer: "To stop leakage current",
-      socraticHint: "Think of the wicket-keeper pausing the game to stop extra runs.",
-      type: 'Conceptual'
-    },
-    {
-      id: 3,
-      question: "Why is HERIC considered efficient?",
-      options: ["It uses fewer switches", "It decouples AC and DC sides", "It is cheaper", "It requires no cooling"],
-      correctAnswer: "It decouples AC and DC sides",
-      socraticHint: "Efficiency comes from separating the source from the load when not needed.",
-      type: 'Applied Logic'
-    }
-  ],
-  flashcards: [
-    { id: 1, term: "HERIC", definition: "Highly Efficient and Reliable Inverter Concept." },
-    { id: 2, term: "Zero State", definition: "The 'Pause' mode where Switch S5 stops leakage." },
-    { id: 3, term: "Leakage Current", definition: "Wasted energy flowing to ground." },
-    { id: 4, term: "Positive State", definition: "Active power generation phase." }
-  ]
-};
-
 export const analyzeImage = async (
   file: File, 
   settings: UserSettings
 ): Promise<AnalysisResult> => {
-  if (settings.useMockMode) {
-    return new Promise((resolve) => setTimeout(() => resolve(MOCK_DATA), 2000));
-  }
-
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {
@@ -300,20 +238,12 @@ export const generateHint = async (
   }
 };
 
+// Fix: Removed unused useMockMode parameter from expandMindMapNode function signature.
 export const expandMindMapNode = async (
   rootTopic: string,
   nodeLabel: string,
-  nodeId: string,
-  useMockMode: boolean
+  nodeId: string
 ): Promise<MindMapNode[]> => {
-  if (useMockMode) {
-    return new Promise((resolve) => setTimeout(() => resolve([
-      { id: `${nodeId}-1`, label: `Details of ${nodeLabel}`, description: `Deep dive into ${nodeLabel}.`, parentId: nodeId },
-      { id: `${nodeId}-2`, label: `Functions of ${nodeLabel}`, description: `The primary functions and operational characteristics of ${nodeLabel}.`, parentId: nodeId },
-      { id: `${nodeId}-3`, label: `Types of ${nodeLabel}`, description: `Various classifications and variations found in ${nodeLabel} implementations.`, parentId: nodeId }
-    ]), 1000));
-  }
-
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `Root Topic: "${rootTopic}". Sub-Topic: "${nodeLabel}". Create a sub-layer JSON array in English. 
   Generate exactly 3-4 specific sub-nodes that expand on this concept.

@@ -10,8 +10,8 @@ export interface UserSettings {
   mood: Mood;
   language: Language;
   interest: Interest;
-  useMockMode: boolean;
-  apiKey: string; // Added apiKey
+  // useMockMode: boolean; // Added apiKey
+  apiKey: string; 
 }
 
 export interface MindMapNode {
