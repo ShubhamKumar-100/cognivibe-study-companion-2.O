@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   BookOpen, HelpCircle, Network, Zap, Volume2, RotateCw, StickyNote, 
@@ -175,17 +176,19 @@ const StoryMode: React.FC<{ story: any; cheatSheet: any[]; visualMnemonic?: stri
                       const startIndex = cumulativeCharCount;
                       const safeSentence = String(sentence || '');
                       const endIndex = startIndex + safeSentence.length;
-                      cumulativeCharCount += safeSentence.length;
-                      if (sIdx === sentences.length - 1) cumulativeCharCount += 1; 
                       
-                      const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex < endIndex + 2);
+                      const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex <= endIndex);
+                      
+                      // Increment cumulative count for next sentence, plus one for potential space
+                      cumulativeCharCount += safeSentence.length;
+                      if (sIdx < sentences.length - 1) cumulativeCharCount += 1; 
                       
                       return (
                         <span 
                           key={sIdx}
-                          className={`transition-colors duration-300 rounded px-0.5 ${
+                          className={`transition-colors duration-200 rounded px-0.5 ${
                               isActive 
-                              ? 'bg-yellow-200 text-gray-900 box-decoration-clone dark:bg-teal-800 dark:text-white shadow-sm font-medium' 
+                              ? 'bg-teal-500/30 text-teal-900 dark:text-teal-200 box-decoration-clone shadow-sm font-semibold' 
                               : ''
                           }`}
                         >
@@ -207,17 +210,18 @@ const StoryMode: React.FC<{ story: any; cheatSheet: any[]; visualMnemonic?: stri
                   const startIndex = cumulativeCharCount;
                   const safeSentence = String(sentence || '');
                   const endIndex = startIndex + safeSentence.length;
+                  
+                  const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex <= endIndex);
+                  
                   cumulativeCharCount += safeSentence.length;
-                  if (sIdx === sentences.length - 1) cumulativeCharCount += 1; 
-                  
-                  const isActive = isPlaying && String(audioText || '') === safeStory && (currentCharIndex >= startIndex && currentCharIndex < endIndex + 2);
-                  
+                  if (sIdx < sentences.length - 1) cumulativeCharCount += 1; 
+
                   return (
                     <span 
                       key={sIdx}
-                      className={`transition-colors duration-300 rounded px-0.5 ${
+                      className={`transition-colors duration-200 rounded px-0.5 ${
                           isActive 
-                          ? 'bg-yellow-200 text-gray-900 box-decoration-clone dark:bg-teal-800 dark:text-white shadow-sm font-medium' 
+                          ? 'bg-teal-500/30 text-teal-900 dark:text-teal-200 box-decoration-clone shadow-sm font-semibold' 
                           : ''
                       }`}
                     >
@@ -249,24 +253,38 @@ const StoryMode: React.FC<{ story: any; cheatSheet: any[]; visualMnemonic?: stri
   return (
     <div className={`flex flex-col h-full relative transition-all duration-500 ${themeStyles.container}`}>
        {!zenMode && (
-        <div className={`flex-none p-2 md:p-3 flex items-center justify-between shadow-sm z-30 border-b ${themeStyles.border} ${bgTint !== 'default' ? 'bg-white/5' : 'bg-panel'}`}>
-            <div className="flex items-center gap-2 md:gap-3">
-                <button onClick={handlePlayPause} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center shadow-md">
-                    {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
+        <div className={`flex-none p-4 md:p-6 flex items-center justify-between shadow-md z-30 border-b ${themeStyles.border} bg-panel/80 backdrop-blur-md`}>
+            <div className="flex items-center gap-3 md:gap-4">
+                <button 
+                  onClick={handlePlayPause} 
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-teal-500 hover:bg-teal-600 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95"
+                  title={isPlaying ? "Pause" : "Play Narration"}
+                >
+                    {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
                 </button>
-                <button onClick={stop} className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-700/50 hover:bg-red-500/20 hover:text-red-400 text-text-muted flex items-center justify-center">
-                    <Square size={10} fill="currentColor" />
+                <button 
+                  onClick={stop} 
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-teal-500/10 hover:bg-teal-500/20 text-teal-500 flex items-center justify-center transition-colors border border-teal-500/20"
+                  title="Stop"
+                >
+                    <Square size={18} fill="currentColor" />
                 </button>
-                <div className="w-px h-6 md:h-8 bg-gray-700/30 mx-1"></div>
-                 <button onClick={() => setIsHighlighterActive(!isHighlighterActive)} className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border shadow-sm ${isHighlighterActive ? 'bg-yellow-400 text-gray-900 border-yellow-500' : 'bg-gray-700/30 text-text-muted hover:text-text border-transparent'}`}>
-                    <Highlighter size={16} />
+                <div className="w-px h-8 md:h-10 bg-gray-700/30 mx-2"></div>
+                 <button 
+                  onClick={() => setIsHighlighterActive(!isHighlighterActive)} 
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border shadow-sm transition-all ${isHighlighterActive ? 'bg-yellow-400 text-gray-900 border-yellow-500 scale-110' : 'bg-teal-500/10 text-teal-400 hover:text-teal-300 border-transparent hover:bg-teal-500/20'}`}
+                  title="Toggle Text Highlighter"
+                >
+                    <Highlighter size={20} />
                 </button>
             </div>
-            <div className="flex items-center gap-1 md:gap-2 bg-gray-700/20 rounded-lg p-1">
-                <span className={`text-xs px-1 ${themeStyles.text}`}><Volume2 size={12}/></span>
-                <button onClick={() => handleSpeedChange(-0.25)} className={`${themeStyles.text} hover:text-accent w-5 md:w-6 text-[10px] md:text-xs font-mono font-bold hover:bg-white/10 rounded`}>-</button>
-                <span className="text-[10px] md:text-xs font-mono text-accent w-8 md:w-10 text-center font-bold">{speed.toFixed(2)}x</span>
-                <button onClick={() => handleSpeedChange(0.25)} className={`${themeStyles.text} hover:text-accent w-5 md:w-6 text-[10px] md:text-xs font-mono font-bold hover:bg-white/10 rounded`}>+</button>
+            <div className="flex items-center gap-2 md:gap-4 bg-teal-500/5 rounded-2xl p-2 border border-teal-500/10">
+                <span className="text-teal-400 hidden sm:block"><Volume2 size={20}/></span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => handleSpeedChange(-0.25)} className="w-8 h-8 md:w-10 md:h-10 text-lg md:text-xl font-bold text-teal-400 hover:bg-teal-500/10 rounded-full transition-colors">-</button>
+                  <span className="text-sm md:text-lg font-mono text-teal-400 w-12 md:w-16 text-center font-black tracking-tighter">{speed.toFixed(2)}x</span>
+                  <button onClick={() => handleSpeedChange(0.25)} className="w-8 h-8 md:w-10 md:h-10 text-lg md:text-xl font-bold text-teal-400 hover:bg-teal-500/10 rounded-full transition-colors">+</button>
+                </div>
             </div>
         </div>
        )}
@@ -383,7 +401,7 @@ const QuizMode: React.FC<{ initialQuestions: QuizQuestion[] }> = ({ initialQuest
               new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3').play().catch(() => {});
               confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#14b8a6', '#f59e0b', '#ffffff'] });
             } else {
-              new Audio('https://assets.mixkit.co/active_storage/sfx/2882/2882-preview.mp3').play().catch(() => {});
+              // Removed Disappointed sound effect
             }
         }
     }, [showResult, percentage, currentScore, questions.length, weakestCat, setScore, setTotalQuestions, setWeakestCategory]);
@@ -475,8 +493,7 @@ const GamifiedQuestionCard: React.FC<{ question: QuizQuestion; onAnswer: (correc
             if (isFirstClick) onAnswer(true);
         } else {
             setStatus('incorrect');
-            // Incorrect answer sound as requested (disappointed tone)
-            new Audio('https://assets.mixkit.co/active_storage/sfx/2882/2882-preview.mp3').play().catch(() => {});
+            // Removed incorrect answer sound
             if (isFirstClick) onAnswer(false);
             setIsLoadingHint(true);
             const newHint = await generateHint(String(question.question), String(selectedOptionText), String(question.correctAnswer), topic);

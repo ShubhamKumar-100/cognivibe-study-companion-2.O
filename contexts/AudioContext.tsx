@@ -33,6 +33,7 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   // Refs
   const isSpeakingRef = useRef(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const currentChunkStartRef = useRef(0);
   
   // Chrome Bug Fix: Store utterance globally to prevent Garbage Collection
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -74,10 +75,9 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const voice = getBestVoice();
       if (voice) utterance.voice = voice;
 
-      utterance.onboundary = (event) => {
-        if (event.name === 'word' || event.name === 'sentence') {
-          setCurrentCharIndex(event.charIndex);
-        }
+      // Fixed boundary sync as per prompt
+      utterance.onboundary = (e) => {
+        setCurrentCharIndex(e.charIndex + (currentChunkStartRef.current || 0));
       };
 
       utterance.onstart = () => {
@@ -125,6 +125,7 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const playText = (newText: string) => {
     setText(newText);
+    currentChunkStartRef.current = 0;
     speak(newText, speed);
   };
 
@@ -147,6 +148,7 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     isSpeakingRef.current = false;
     setCurrentCharIndex(0);
     activeUtteranceRef.current = null;
+    currentChunkStartRef.current = 0;
   };
 
   // Instant Speed Update Logic

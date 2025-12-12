@@ -245,16 +245,33 @@ export const expandMindMapNode = async (
   nodeId: string
 ): Promise<MindMapNode[]> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Root Topic: "${rootTopic}". Sub-Topic: "${nodeLabel}". Create a sub-layer JSON array in English. 
-  Generate exactly 3-4 specific sub-nodes that expand on this concept.
-  Return strictly RAW JSON ONLY. No markdown. No index keys.
-  Structure: [ { "id": "${nodeId}-X", "label": "...", "description": "...", "parentId": "${nodeId}" } ]`;
+  
+  const systemPrompt = `
+    You are a Mind Map Architect.
+    Task: The user has clicked on the node "${nodeLabel}" (Context: ${rootTopic}).
+    Goal: Generate 4-5 specific sub-concepts to expand this node.
+
+    CRITICAL OUTPUT RULES:
+    1. Return ONLY a raw JSON Array. Do not use Markdown code blocks (no \`\`\`json).
+    2. Structure:
+    [
+      {
+        "id": "${nodeId}-sub1",
+        "label": "Short Title",
+        "description": "Brief, clear explanation.",
+        "parentId": "${nodeId}"
+      },
+      ...
+    ]
+    3. "parentId" MUST be exactly "${nodeId}" to link correctly.
+    4. "id" must be unique.
+    `;
 
   try {
     // Fix: Added explicit GenerateContentResponse typing
     const response: GenerateContentResponse = await withRetry(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: prompt,
+      contents: systemPrompt,
       config: { responseMimeType: "application/json" }
     }));
     return cleanAndParseJSON(response.text || "[]") as MindMapNode[];
